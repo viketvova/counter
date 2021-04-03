@@ -1,26 +1,31 @@
-import React from 'react';
-import logo from './logo.svg';
-import './App.css';
+import React, {useState} from 'react';
+import {ButtonChange} from "./Button";
+import './App.css'
+
 
 function App() {
-  return (
-    <div className="App">
-      <header className="App-header">
-        <img src={logo} className="App-logo" alt="logo" />
-        <p>
-          Edit <code>src/App.tsx</code> and save to reload.
-        </p>
-        <a
-          className="App-link"
-          href="https://reactjs.org"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Learn React
-        </a>
-      </header>
-    </div>
-  );
+    let [value, setValue] = useState<number>(0)
+    let [maxValue, setMaxValue] = useState<number>(5)
+
+
+    const changeValue = (): void => {
+        setValue(++value)
+    }
+
+    const dropValue = (): void => {
+        setValue(0)
+    }
+
+
+    return (
+        <div className='value'>
+            <div className={value === maxValue ? 'num red' : 'num'}>{value}</div>
+
+            <ButtonChange value={value} title={'Inc'} color={'primary'} changeValue={changeValue} disabled={value === maxValue}/>
+            <ButtonChange value={value} title={'Reset'} color={'secondary'} changeValue={dropValue} disabled={value === 0}/>
+
+        </div>
+    );
 }
 
 export default App;
