@@ -1,0 +1,12 @@
+div.values {
+    margin: 20px;
+}
+
+input {
+    text-align: center;
+}
+
+.error {
+    background: pink;
+    border: 2px solid mediumvioletred;
+}

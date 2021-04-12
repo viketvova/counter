@@ -1,13 +1,20 @@
 div {
-    margin: 8px;
+    margin: 15px;
 }
 
-.value {
+.value, .setValue{
     border: 2px solid black;
-    width: 200px;
-    height: 100px;
+    width: 350px;
+    height: 150px;
     margin-left: 500px;
     text-align: center;
+}
+
+
+.flex {
+    display: flex;
+    flex-direction: row;
+    height: 15px;
 }
 
 .num {
@@ -17,4 +24,5 @@ div {
 
 .red {
     color: red;
+    font-weight: bold;
 }
