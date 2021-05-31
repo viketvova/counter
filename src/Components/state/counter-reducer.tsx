@@ -1,5 +1,3 @@
-import {ChangeEvent} from "react";
-
 const initialState: InitialStateType = {
     value: 0,
     maxValue: 5,
@@ -12,6 +10,7 @@ type InitialStateType = {
     startValue: number
     disable: boolean
 }
+
 const CHANGE_VALUE = 'CHANGE_VALUE'
 const DROP_VALUE = 'DROP_VALUE'
 const START_VALUE_HANDLER = 'START_VALUE_HANDLER'
@@ -27,11 +26,11 @@ export type DropValueACType = {
 }
 export type StartValueHandlerACType = {
     type: 'START_VALUE_HANDLER'
-    event: ChangeEvent<HTMLInputElement>
+    event: number
 }
 export type MaxValueHandlerACType = {
     type: 'MAX_VALUE_HANDLER'
-    event: ChangeEvent<HTMLInputElement>
+    event: number
 }
 export type OnFocusHandlerACType = {
     type: 'ON_FOCUS_HANDLER'
@@ -39,9 +38,15 @@ export type OnFocusHandlerACType = {
 export type StartMaxValueHandlerACType = {
     type: 'START_MAX_VALUE_HANDLER'
 }
+type ActionType =
+    ChangeValueACType
+    | DropValueACType
+    | StartValueHandlerACType
+    | MaxValueHandlerACType
+    | OnFocusHandlerACType
+    | StartMaxValueHandlerACType
 
-export const CounterReducer = (state: InitialStateType = initialState, action: any) => {
-
+export const CounterReducer = (state: InitialStateType = initialState, action: ActionType) => {
     switch (action.type) {
         case CHANGE_VALUE: {
             return {...state, value: state.value + 1}
@@ -50,46 +55,47 @@ export const CounterReducer = (state: InitialStateType = initialState, action: a
             return {...state, value: state.startValue}
         }
         case START_VALUE_HANDLER: {
-            if (+action.event <= state.maxValue) {
-                return {
+
+            return action.event <= state.maxValue
+                ? {
                     ...state,
                     disable: state.disable = true,
                     startValue: state.startValue = action.event
                 }
-
-            } else if (action.event < 0) {
-                return {
-                    ...state, disable: state.disable = true
-                }
-            }
-            return state
+                : action.event < 0
+                    ? {
+                        ...state, disable: state.disable = true
+                    } : state
         }
-        case MAX_VALUE_HANDLER:
-            return action.value >= state.startValue
-                ? {...state, disable: state.disable = true, maxValue: state.maxValue = action.value}
-                : state
+        case MAX_VALUE_HANDLER: {
+            let copyState = {...state}
+            if (action.event >= copyState.startValue)
+                return {
+                    ...state,
+                    disable: state.disable = true,
+                    maxValue: state.maxValue = action.event
+                }
+            return {...copyState}
+        }
         case ON_FOCUS_HANDLER:
             return {
                 ...state,
                 disable: state.disable = true
             }
         case START_MAX_VALUE_HANDLER: {
-            let copyState = {...state}
-            let startValue = localStorage.getItem('start-value')
-            copyState.disable = false
-            if (startValue) {
-                let newS = JSON.parse('start-value')
-                copyState.startValue = newS
-                copyState.value = newS
+            localStorage.setItem("start-value", JSON.stringify(state.startValue))
+            localStorage.setItem("max-value", JSON.stringify(state.maxValue))
+            return {
+                ...state,
+                disable: state.disable = false,
+                startValue: state.startValue,
+                maxValue: state.maxValue,
+                value: state.startValue
             }
-            let maxValue = localStorage.getItem('max-value')
-            if (maxValue) JSON.parse('max-value')
-            return {...copyState}
         }
         default:
             return state
     }
-
 }
 export const ChangeValueAC = (): ChangeValueACType => ({
     type: CHANGE_VALUE
@@ -97,11 +103,11 @@ export const ChangeValueAC = (): ChangeValueACType => ({
 export const DropValueAC = (): DropValueACType => ({
     type: DROP_VALUE
 })
-export const StartValueHandlerAC = (event: ChangeEvent<HTMLInputElement>): StartValueHandlerACType => ({
+export const StartValueHandlerAC = (event: number): StartValueHandlerACType => ({
     type: START_VALUE_HANDLER,
     event
 })
-export const MaxValueHandlerAC = (event: ChangeEvent<HTMLInputElement>): MaxValueHandlerACType => ({
+export const MaxValueHandlerAC = (event: number): MaxValueHandlerACType => ({
     type: MAX_VALUE_HANDLER,
     event
 })

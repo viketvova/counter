@@ -1,65 +1,62 @@
-import React, {ChangeEvent, useEffect, useState} from 'react';
+import React, {ChangeEvent, useEffect} from 'react';
 import './App.css'
 import {ValueForm} from "./Components/ValueForm/ValueForm";
 import {SetValueForm} from "./Components/SetValueForm/SetValueForm";
+import {useDispatch, useSelector} from "react-redux";
+import {
+    ChangeValueAC,
+    DropValueAC,
+    MaxValueHandlerAC,
+    OnFocusHandlerAC,
+    StartMaxValueHandlerAC,
+    StartValueHandlerAC
+} from "./Components/state/counter-reducer";
+import {AppRootState} from "./Components/state/store";
 
 function App() {
-    let [value, setValue] = useState(0)
-    let [maxValue, setMaxValue] = useState(5)
-    let [startValue, setStartValue] = useState(0)
-    let [disable, setDisable] = useState(false)
+    let value = useSelector<AppRootState, number>(state => state.counter.value)
+    let maxValue = useSelector<AppRootState, number>(state => state.counter.maxValue)
+    let startValue = useSelector<AppRootState, number>(state => state.counter.startValue)
+    let disable = useSelector<AppRootState, boolean>(state => state.counter.disable)
 
-    let start = 'start-value'
-    let max = 'max-value'
+    const dispatch = useDispatch()
 
     useEffect(() => {
-        if (value === startValue) setDisable(true)
-        else startMaxValueHandler()
+        if (value === startValue) dispatch(OnFocusHandlerAC())
+        else dispatch(StartMaxValueHandlerAC())
+    }, [dispatch])
+
+    useEffect(() => {
+        let startValue = localStorage.getItem("start-value")
+        if (startValue) dispatch(StartValueHandlerAC(+JSON.parse(startValue)))
+        let maxValue = localStorage.getItem("max-value")
+        if (maxValue) dispatch(MaxValueHandlerAC(+JSON.parse(maxValue)))
     }, [])
 
-    useEffect(() => {
-        localStorage.setItem(start, JSON.stringify(startValue))
-        localStorage.setItem(max, JSON.stringify(maxValue))
-    }, [maxValue, startValue])
-
     const changeValue = (): void => {
-        setValue(value + 1)
-    }
-
-    const dropValue = (): void => {
-        setValue(startValue)
+        dispatch(ChangeValueAC())
     }
 
     const startMaxValueHandler = () => {
-        let startValue = localStorage.getItem(start)
-        setDisable(false)
-        if (startValue) {
-            let newS = JSON.parse(startValue)
-            setStartValue(newS)
-            setValue(newS)
-        }
-        let maxValue = localStorage.getItem(max)
-        if (maxValue) setMaxValue(JSON.parse(maxValue))
+        dispatch(StartMaxValueHandlerAC())
+    }
+
+    const dropValue = (): void => {
+        dispatch(DropValueAC())
     }
 
     const startValueHandler = (e: ChangeEvent<HTMLInputElement>): void => {
-        if (+e.target.value <= maxValue) {
-            setDisable(true)
-            setStartValue(+e.target.value)
-        } else if (+e.target.value < 0) {
-            setDisable(true)
-        }
+        let value = +e.currentTarget.value
+        dispatch(StartValueHandlerAC(value))
     }
 
     const maxValueHandler = (e: ChangeEvent<HTMLInputElement>): void => {
-        if (+e.target.value >= startValue) {
-            setDisable(true)
-            setMaxValue(+e.target.value)
-        }
+        let value = +e.currentTarget.value
+        dispatch(MaxValueHandlerAC(value))
     }
 
     const onFocusHandler = () => {
-        setDisable(true)
+        dispatch(OnFocusHandlerAC())
     }
 
     return (
